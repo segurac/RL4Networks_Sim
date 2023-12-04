@@ -82,7 +82,7 @@ RUN cd ns-allinone-3.30/ns-3.30-mobility/contrib && \
 
 ##Compile again NS3
 RUN cd ns-allinone-3.30/ns-3.30-mobility/ && \
-    ./waf configure --enable-examples && \
+    CXXFLAGS="-O3" ./waf configure --enable-examples && \
     ./waf build
 
 RUN cd ns-allinone-3.30/ns-3.30-mobility/contrib/opengym/ && \
@@ -107,7 +107,7 @@ ADD https://api.github.com/repos/segurac/ns-3-dev-git/git/refs/heads/ns-3.30-mob
 
 RUN cd ns-allinone-3.30/ns-3.30-mobility/ && \
     git pull  && \
-    ./waf configure -d debug --enable-examples --enable-tests && \
+    CXXFLAGS="-O3" ./waf configure -d debug --enable-examples --enable-tests && \
     ./waf
 
 
