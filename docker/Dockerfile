@@ -61,6 +61,8 @@ RUN git clone https://github.com/segurac/ns-3-allinone ns-allinone-3.30
 
 RUN cd ns-allinone-3.30 && ./download.py -n ns-3.30-mobility
 
+RUN cd ns-allinone-3.30/ns-3.30-mobility/ && git reset --hard c972449f774c268fd20b82e26245d6584978fe86
+
 RUN cd ns-allinone-3.30/ns-3.30-mobility/ && CXXFLAGS="-O3" ./waf --enable-tests --enable-examples configure
 
 RUN cd ns-allinone-3.30/ns-3.30-mobility/ && ./waf build
@@ -85,8 +87,12 @@ RUN cd ns-allinone-3.30/ns-3.30-mobility/ && \
 
 RUN cd ns-allinone-3.30/ns-3.30-mobility/contrib/opengym/ && \
     pip3 install ./model/ns3gym && \
-    pip install protobuf==3.20.3
+    pip install protobuf==3.20.3    
 
+
+## Generate a .whl file for the client
+RUN cd ns-allinone-3.30/ns-3.30-mobility/contrib/opengym/model/ns3gym && \
+    python3 setup.py bdist_wheel
 
 
 ## Test that it works
@@ -94,6 +100,16 @@ RUN cd ns-allinone-3.30/ns-3.30-mobility/contrib/opengym/ && \
 #./simple_test.py
 # esto para otra versión más antigua de protocol buffers
 # PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python ./simple_test.py
+
+#Since this line changes for every commit, it will effectively rebuild everything after this
+ADD https://api.github.com/repos/segurac/ns-3-dev-git/git/refs/heads/ns-3.30-mobility version.json
+
+
+RUN cd ns-allinone-3.30/ns-3.30-mobility/ && \
+    git pull  && \
+    ./waf configure -d debug --enable-examples --enable-tests && \
+    ./waf
+
 
 
 
