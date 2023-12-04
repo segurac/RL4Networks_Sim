@@ -1,4 +1,8 @@
-FROM ubuntu:16.04
+FROM ubuntu:20.04
+
+
+ENV TZ=Europe/Madrid
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 RUN apt-get update && \
     apt-get install -y \
@@ -11,11 +15,6 @@ RUN apt-get update && \
         python-dev \
         python-setuptools \
         qt5-default \
-        python-pygraphviz \
-        python-kiwi \
-        python-pygoocanvas \
-        libgoocanvas-dev \
-        ipython \
         autoconf \
         cvs \
         bzr \
@@ -28,7 +27,6 @@ RUN apt-get update && \
         libfl-dev \
         tcpdump \
         gsl-bin \
-        libgsl2 \
         libgsl-dev \
         sqlite \
         sqlite3 \
@@ -45,8 +43,14 @@ RUN apt-get update && \
         libgtk2.0-dev \
         vtun \
         lxc \
-        libboost-signals-dev \
-        libboost-filesystem-dev
+        libboost-signals1.67-dev \
+        libboost-filesystem1.67-dev \
+        python3-dev \
+        python3-virtualenv \
+        python3.9-dev \
+        python3.9-venv \
+        python3.8-venv \
+        build-essential
 
 RUN mkdir -p /usr/ns3
 WORKDIR /usr 
@@ -65,5 +69,32 @@ RUN cd ns-allinone-3.30/ns-3.30-mobility/ && ./waf build
 
 RUN ln -s /usr/ns-allinone-3.30/ns-3.30-mobility/ /usr/ns3/
 
-RUN apt-get clean && \
-    rm -rf /var/lib/apt
+RUN apt-get clean
+
+##### ns3gym
+
+RUN apt-get install --yes libzmq5 libzmq3-dev libprotobuf-dev protobuf-compiler
+
+RUN cd ns-allinone-3.30/ns-3.30-mobility/contrib && \
+    git clone https://github.com/tkn-tub/ns3-gym.git ./opengym && \
+    cd opengym/ && \
+    git checkout app
+
+##Compile again NS3
+RUN cd ns-allinone-3.30/ns-3.30-mobility/ && \
+    ./waf configure --enable-examples && \
+    ./waf build
+
+RUN apt-get install -y python3-pip
+
+RUN cd ns-allinone-3.30/ns-3.30-mobility/contrib/opengym/ && \
+    pip3 install --user ./model/ns3gym
+
+## Test that it works
+#cd ns-allinone-3.30/ns-3.30-mobility/contrib/opengym/examples/opengym/ 
+#./simple_test.py
+# esto para otra versión más antigua de protocol buffers
+# PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python ./simple_test.py
+
+
+
