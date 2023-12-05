@@ -8,10 +8,10 @@ from stable_baselines3.td3.policies import MlpPolicy
 from stable_baselines3.common import results_plotter
 from VecMonitor import VecMonitor
 from stable_baselines3.common.results_plotter import load_results, ts2xy
-from stable_baselines3.common.noise import NormalActionNoise, OrnsteinUhlenbeckActionNoise, AdaptiveParamNoiseSpec
+from stable_baselines3.common.noise import NormalActionNoise
 from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 from stable_baselines3.common.callbacks import BaseCallback
-from stable_baselines3.common.cmd_util import make_vec_env
+from stable_baselines3.common.env_util import make_vec_env
 from myns3env import myns3env
 import csv
 

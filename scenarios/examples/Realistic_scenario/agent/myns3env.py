@@ -35,7 +35,11 @@ class myns3env(gym.Env):
     self.action_space = spaces.Box(low=-1, high=1,
                                         shape=(self.action_dim,), dtype=np.float32)
     self.observation_space = spaces.Box(low=0, high=self.Users,
-                                        shape=(self.state_dim,), dtype=np.float32)    
+                                        shape=(self.state_dim,), dtype=np.float32)
+
+  def seed(self, seed: int):
+    pass
+
   def reset(self):
 
     state = self.env.reset()
