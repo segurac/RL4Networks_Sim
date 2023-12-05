@@ -1,13 +1,5 @@
 # RL4Networks_Sim
 
-
-
-Docker Build instructions
-
-cd docker/
-
-docker build -t ns3.30-mobility:latest ./
-
 ## General workflow
 The actors involved in the workflows are the followings:
 * **NS3 Simulator**: It is executed inside a docker container
