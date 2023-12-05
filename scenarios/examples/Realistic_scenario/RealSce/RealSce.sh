@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 cp scratch/RealSce/Real_model-attributes.txt .
 CXXFLAGS="-O3" ./waf configure -d debug --enable-examples --enable-tests
 ./waf build
