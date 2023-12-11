@@ -1,0 +1,13 @@
+119c119
+<                 mtype = np.float
+---
+>                 mtype = np.float64
+121c121
+<                 mtype = np.float
+---
+>                 mtype = np.float32
+437c437
+<             self.viewer.close()
+\ No newline at end of file
+---
+>             self.viewer.close()

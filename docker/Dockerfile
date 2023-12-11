@@ -80,6 +80,12 @@ RUN cd ns-allinone-3.30/ns-3.30-mobility/contrib && \
     cd opengym/ && \
     git checkout app
 
+#### Apply patch to ns3env to be compatible with new numpy
+
+COPY ns3env_numpy.patch /tmp/
+RUN patch ns-allinone-3.30/ns-3.30-mobility/contrib/opengym/model/ns3gym/ns3gym/ns3env.py < /tmp/ns3env_numpy.patch
+
+
 ##Compile again NS3
 RUN cd ns-allinone-3.30/ns-3.30-mobility/ && \
     CXXFLAGS="-O3" ./waf configure --enable-examples && \
