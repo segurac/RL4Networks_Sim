@@ -37,18 +37,6 @@ pip install -r requirements.txt
 pip install docker/ns3gym-0.1.0-py3-none-any.whl
 ```
 
-Open the following file:
-
-<agent_env>/lib/python3.11/site-packages/ns3gym/ns3env.py
-
-Modify line 119
-
-np.float -> np.float64
-
-Modify line 121
-
-np.float -> np.float32
-
 ## Launch scenario
 
 Example: Proof_of_concept
@@ -61,12 +49,18 @@ Open a console for the agent.
 Active agent_env and move to the corresponding agent path
 ```console
 source ./agent_env/bin/activate
-cd <project_dir>/scenarios/examples/Proof_of_concept/agent
+cd <project_dir>
 ```
 
 Launch the agent main 
 ```console
-python3 ddqn_agent.py
+python3 main.py -p poc
+```
+
+that is, 
+
+```console
+python3 main.py -p <name_of_scenario>
 ```
 
 **STEP 2: SIMULATOR**
@@ -83,4 +77,30 @@ Launch the simulator
 ./lauch_simulator.sh
 ```
 
+## Utils
 
+### Tensorboard (When it is possible)
+
+
+```console
+ssh -L 6006:127.0.0.1:6006 <user>@<server>
+```
+
+Launch tensorboard on the server
+```console
+cd <project_dir>/scenarios/examples/Proof_of_concept/agent 
+tensorboard --logdir=runs --bind_all --port=6006
+```
+
+In your local pc, open a web browser 
+```console
+localhost:6006
+```
+
+Remember to activate the automatic refresh in the Tensorboard preferences!
+
+### Launch with nohup
+
+```console
+nohup myprogram > myprogram.out 2>&1 &
+```

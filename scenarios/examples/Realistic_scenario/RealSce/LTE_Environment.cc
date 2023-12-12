@@ -47,12 +47,7 @@
 #include "ns3/netanim-module.h"
 
 
-
-
-
 using namespace ns3;
-
-
 
 NS_LOG_COMPONENT_DEFINE("MyLTENetwork");
 
@@ -67,53 +62,27 @@ std::string m_traceFile; ///< trace file
 
 
 void NotifyHandoverStartEnb(std::string context,
-
     uint64_t imsi,
-
     uint16_t cellid,
-
     uint16_t rnti,
-
-    uint16_t targetCellId)
-
-{
-
-    std::cout << context
-
-              << " eNB CellId " << cellid
-
-              << ": start handover of UE with IMSI " << imsi
-
-              << " RNTI " << rnti
-
-              << " to CellId " << targetCellId
-
-              << std::endl;
-
+    uint16_t targetCellId) {
+    std::cout << context <<
+        " eNB CellId " << cellid <<
+        ": start handover of UE with IMSI " << imsi <<
+        " RNTI " << rnti <<
+        " to CellId " << targetCellId <<
+        std::endl;
 }
 
-
-
 void NotifyHandoverEndOkEnb(std::string context,
-
     uint64_t imsi,
-
     uint16_t cellid,
-
-    uint16_t rnti)
-
-{
-
-    std::cout << context
-
-              << " eNB CellId " << cellid
-
-              << ": completed handover of UE with IMSI " << imsi
-
-              << " RNTI " << rnti
-
-              << std::endl;
-
+    uint16_t rnti) {
+    std::cout << context <<
+        " eNB CellId " << cellid <<
+        ": completed handover of UE with IMSI " << imsi <<
+        " RNTI " << rnti <<
+        std::endl;
 }
 
 
