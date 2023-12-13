@@ -47,8 +47,7 @@ uint32_t nEdgeUes = 8;
 uint32_t nEdgeUes2 = 8;
 uint16_t nCenterUes = 25;
 
-void
-NotifyHandoverStartEnb(std::string context,
+void NotifyHandoverStartEnb(std::string context,
     uint64_t imsi,
     uint16_t cellid,
     uint16_t rnti,
@@ -61,8 +60,7 @@ NotifyHandoverStartEnb(std::string context,
         std::endl;
 }
 
-void
-NotifyHandoverEndOkEnb(std::string context,
+void NotifyHandoverEndOkEnb(std::string context,
     uint64_t imsi,
     uint16_t cellid,
     uint16_t rnti) {
