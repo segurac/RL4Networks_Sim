@@ -4,8 +4,10 @@ FROM ubuntu:22.04
 ENV TZ=Europe/Madrid
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-RUN apt-get update && \
-    apt-get install -y \
+
+RUN apt-get update
+
+RUN DEBIAN_FRONTEND=noninteractive apt install --yes \
         git \
         mercurial \
         gcc \
@@ -50,72 +52,68 @@ RUN apt-get update && \
         libzmq5 \
         libzmq3-dev \
         libprotobuf-dev \
-        protobuf-compiler
+        protobuf-compiler \
+        pkg-config \
+        python3-setuptools \
+        gir1.2-gtk-3.0  gir1.2-goocanvas-2.0 \
+        python3-gi python3-gi-cairo python3-pygraphviz \
+        openmpi-bin openmpi-common openmpi-doc libopenmpi-dev \
+        autoconf \
+        unrar \
+        tcpdump wireshark \
+        libxml2 libxml2-dev \
+        qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools \
+        libgcrypt20-dev \
+        libgtk-3-dev \
+        python3-pygccxml \
+        ccache \ 
+        \cmake-format \
+        libeigen3-dev && \
+        apt-get clean
+
 
 RUN mkdir -p /usr/ns3
 WORKDIR /usr 
 
-# RUN wget https://www.nsnam.org/release/ns-allinone-3.30.tar.bz2  && \
-    # tar -jxvf ns-allinone-3.30.tar.bz2
 RUN git clone https://github.com/segurac/ns-3-allinone ns-allinone-3.30
 
-RUN cd ns-allinone-3.30 && ./download.py -n ns-3.30-mobility
+RUN cd ns-allinone-3.30 && ./download.py -n dev-mobility && mv dev-mobility ns-3-mobility
 
-RUN cd ns-allinone-3.30/ns-3.30-mobility/ && git reset --hard c972449f774c268fd20b82e26245d6584978fe86
+RUN python3 -m pip install --user cppyy
 
-RUN cd ns-allinone-3.30/ns-3.30-mobility/ && CXXFLAGS="-O3" ./waf --enable-tests --enable-examples configure
+RUN cd ns-allinone-3.30/ns-3-mobility/ && \
+./ns3 configure --build-profile=optimized --enable-examples --enable-tests  --enable-mpi --enable-python
 
-RUN cd ns-allinone-3.30/ns-3.30-mobility/ && ./waf build
+RUN cd ns-allinone-3.30/ns-3-mobility/ && ./ns3 build
 
-# RUN cd ns-allinone-3.30 && ./build.py --enable-examples --enable-tests
-
-RUN ln -s /usr/ns-allinone-3.30/ns-3.30-mobility/ /usr/ns3/
-
-RUN apt-get clean
-
-##### ns3gym
-
-RUN cd ns-allinone-3.30/ns-3.30-mobility/contrib && \
+RUN cd ns-allinone-3.30/ns-3-mobility/contrib && \
     git clone https://github.com/tkn-tub/ns3-gym.git ./opengym && \
     cd opengym/ && \
-    git checkout app
+    git checkout app-ns-3.36+
 
-#### Apply patch to ns3env to be compatible with new numpy
-
+# Patch it
 COPY ns3env_numpy.patch /tmp/
-RUN patch ns-allinone-3.30/ns-3.30-mobility/contrib/opengym/model/ns3gym/ns3gym/ns3env.py < /tmp/ns3env_numpy.patch
+RUN patch ns-allinone-3.30/ns-3-mobility/contrib/opengym/model/ns3gym/ns3gym/ns3env.py < /tmp/ns3env_numpy.patch
 
 
 ##Compile again NS3
-RUN cd ns-allinone-3.30/ns-3.30-mobility/ && \
-    CXXFLAGS="-O3" ./waf configure --enable-examples && \
-    ./waf build
+RUN cd ns-allinone-3.30/ns-3-mobility/ && \
+    ./ns3 configure --build-profile=optimized --enable-examples --enable-tests  --enable-mpi --enable-python && \
+    ./ns3 build
 
-RUN cd ns-allinone-3.30/ns-3.30-mobility/contrib/opengym/ && \
-    pip3 install ./model/ns3gym && \
-    pip install protobuf==3.20.3    
-
+RUN cd ns-allinone-3.30/ns-3-mobility/contrib/opengym/ && \
+    pip3 install --user ./model/ns3gym && \
+    pip install --user protobuf
 
 ## Generate a .whl file for the client
-RUN cd ns-allinone-3.30/ns-3.30-mobility/contrib/opengym/model/ns3gym && \
+RUN cd ns-allinone-3.30/ns-3-mobility/contrib/opengym/model/ns3gym && \
     python3 setup.py bdist_wheel
 
 
-## Test that it works
-#cd ns-allinone-3.30/ns-3.30-mobility/contrib/opengym/examples/opengym/ 
-#./simple_test.py
-# esto para otra versión más antigua de protocol buffers
-# PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python ./simple_test.py
-
-#Since this line changes for every commit, it will effectively rebuild everything after this
 ADD https://api.github.com/repos/segurac/ns-3-dev-git/git/refs/heads/ns-3.30-mobility version.json
 
 
-RUN cd ns-allinone-3.30/ns-3.30-mobility/ && \
+RUN cd ns-allinone-3.30/ns-3-mobility/ && \
     git pull  && \
-    CXXFLAGS="-O3" ./waf configure -d debug --enable-examples --enable-tests && \
-    ./waf
-
-
-
-
+    ./ns3 configure --build-profile=optimized --enable-examples --enable-tests  --enable-mpi --enable-python && \
+    ./ns3 build

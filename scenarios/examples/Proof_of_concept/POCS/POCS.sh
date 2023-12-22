@@ -1,9 +1,11 @@
 #! /bin/bash
 cp scratch/POCS/LTE_Attributes.txt .
-CXXFLAGS="-O3" ./waf configure -d debug --enable-examples --enable-tests
-./waf build
+
+./ns3 configure --build-profile=optimized --enable-examples --enable-tests  --enable-mpi --enable-python
+./ns3 build
 
 for i in {1..250}
 do
-	./waf --run "scratch/POCS/POCS --RunNum=$(($i))"
+
+	./ns3 run "scratch/POCS/LTE_Environment --RunNum=$(($i))"
 done
