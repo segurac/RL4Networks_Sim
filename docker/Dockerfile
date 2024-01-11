@@ -86,6 +86,8 @@ RUN cd ns-allinone-3.30/ns-3-mobility/ && \
 
 RUN cd ns-allinone-3.30/ns-3-mobility/ && ./ns3 build
 
+ADD https://api.github.com/repos/tkn-tub/ns3-gym/git/refs/heads/app-ns-3.36+ version_gym.json
+
 RUN cd ns-allinone-3.30/ns-3-mobility/contrib && \
     git clone https://github.com/tkn-tub/ns3-gym.git ./opengym && \
     cd opengym/ && \
@@ -110,7 +112,7 @@ RUN cd ns-allinone-3.30/ns-3-mobility/contrib/opengym/model/ns3gym && \
     python3 setup.py bdist_wheel
 
 
-ADD https://api.github.com/repos/segurac/ns-3-dev-git/git/refs/heads/ns-3.30-mobility version.json
+ADD https://api.github.com/repos/segurac/ns-3-dev-git/git/refs/heads/dev-mobility version.json
 
 
 RUN cd ns-allinone-3.30/ns-3-mobility/ && \
