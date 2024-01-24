@@ -75,11 +75,13 @@ RUN DEBIAN_FRONTEND=noninteractive apt install --yes \
 RUN mkdir -p /usr/ns3
 WORKDIR /usr 
 
+ADD https://api.github.com/repos/segurac/ns-3-dev-git/git/refs/heads/dev-mobility version.json
+
 RUN git clone https://github.com/segurac/ns-3-allinone ns-allinone-3.30
 
 RUN cd ns-allinone-3.30 && ./download.py -n dev-mobility && mv dev-mobility ns-3-mobility
 
-RUN python3 -m pip install --user cppyy
+RUN python3 -m pip install --user cppyy==2.4.2
 
 RUN cd ns-allinone-3.30/ns-3-mobility/ && \
 ./ns3 configure --build-profile=optimized --enable-examples --enable-tests  --enable-mpi --enable-python
@@ -112,7 +114,7 @@ RUN cd ns-allinone-3.30/ns-3-mobility/contrib/opengym/model/ns3gym && \
     python3 setup.py bdist_wheel
 
 
-ADD https://api.github.com/repos/segurac/ns-3-dev-git/git/refs/heads/dev-mobility version.json
+#ADD https://api.github.com/repos/segurac/ns-3-dev-git/git/refs/heads/dev-mobility version.json
 
 
 RUN cd ns-allinone-3.30/ns-3-mobility/ && \
