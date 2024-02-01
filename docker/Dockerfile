@@ -114,10 +114,12 @@ RUN cd ns-allinone-3.30/ns-3-mobility/contrib/opengym/model/ns3gym && \
     python3 setup.py bdist_wheel
 
 
-#ADD https://api.github.com/repos/segurac/ns-3-dev-git/git/refs/heads/dev-mobility version.json
+#Remove this line in dev or master
+ADD https://api.github.com/repos/segurac/ns-3-dev-git/git/refs/heads/refactor/lte_sim_ref version.json
 
 
 RUN cd ns-allinone-3.30/ns-3-mobility/ && \
+    git checkout refactor/lte_sim_ref  #remove this line in dev or master && \ 
     git pull  && \
     ./ns3 configure --build-profile=optimized --enable-examples --enable-tests  --enable-mpi --enable-python && \
     ./ns3 build
