@@ -224,7 +224,7 @@ std::vector <random_walk_params> load_random_walk_params_csv(fs::path csv_path)
     return output;
 }
 
-int** load_adjacency_matrix_csv(fs::path csv_path, int cell_num) 
+std::vector<std::vector<int>> load_adjacency_matrix_csv(fs::path csv_path, int cell_num) 
 { 
   
     // File pointer 
@@ -235,30 +235,30 @@ int** load_adjacency_matrix_csv(fs::path csv_path, int cell_num)
   
     // Read the Data from the file 
     // as int Vector 
-    int** adjacency_matrix = new int*[cell_num];
-    int i = 0;
-    int j = 0;
+    std::vector<std::vector<int>> adjacency_matrix;
+    adjacency_matrix.reserve(cell_num); // Reserve space for 'cell_num' rows to improve efficiency
+
     std::string line, word, temp; 
 
     // read an entire row and 
     // store it in a string variable 'line' 
     while (std::getline(file, line)){
-        adjacency_matrix[i] = new int[cell_num];
         std::stringstream s(line);
-        j = 0;      
+        std::vector<int> row;
+        row.reserve(cell_num);
+
         while (std::getline(s, word, ';')) { 
             // add all the column data 
             // of a row to a vector 
-            adjacency_matrix[i][j] = std::stoi(word);
-            j += 1; 
+            row.push_back(std::stoi(word));
         } 
-        i += 1;
+        adjacency_matrix.push_back(row);
     }  
     file.close();
 
     std::cout << "\tAdjacency Matrix:" << std::endl;
-    for (i=0; i<cell_num; i++){
-        for (j=0; j<cell_num; j++){
+    for (int i=0; i<cell_num; i++){
+        for (int j=0; j<cell_num; j++){
             std::cout << "\t\t" << i << ", " << j << ": " << adjacency_matrix[i][j] << std::endl;
         }
     }
@@ -635,7 +635,7 @@ int main(int argc, char * argv[]) {
     };
     std::cout << "\tueRandomWalkMobility: " << ueRandomWalkMobility << std::endl;
     std::vector <random_walk_params> randomWalkInfo;
-    if (ueRandomWalkMobility.empty()){
+    if (!ueRandomWalkMobility.empty()){
         randomWalkInfo = load_random_walk_params_csv(ueRandomWalkMobility);
     }
     GlobalValue::GetValueByName("ueSimulatedMobility", stringValue);
@@ -665,7 +665,7 @@ int main(int argc, char * argv[]) {
     tmp2 = tmp1;
     fs::path eNBAdjacencyMatrixFile = ns3_path / tmp2;
     std::cout << "\teNBAdjacencyMatrixFile: " << eNBAdjacencyMatrixFile << std::endl;
-    int** adjacency_matrix = load_adjacency_matrix_csv(eNBAdjacencyMatrixFile, nMacroEnbSites);
+    auto adjacency_matrix = load_adjacency_matrix_csv(eNBAdjacencyMatrixFile, nMacroEnbSites);
     int nEdgeNumber = 0;
     for(int i1 = 0; i1 < int(nMacroEnbSites) ; i1++){
         for (int i2 = 0; i2 < i1; i2++){
