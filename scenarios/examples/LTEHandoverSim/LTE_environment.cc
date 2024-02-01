@@ -635,7 +635,7 @@ int main(int argc, char * argv[]) {
     };
     std::cout << "\tueRandomWalkMobility: " << ueRandomWalkMobility << std::endl;
     std::vector <random_walk_params> randomWalkInfo;
-    if (ueRandomWalkMobility.empty()){
+    if (!ueRandomWalkMobility.empty()){
         randomWalkInfo = load_random_walk_params_csv(ueRandomWalkMobility);
     }
     GlobalValue::GetValueByName("ueSimulatedMobility", stringValue);

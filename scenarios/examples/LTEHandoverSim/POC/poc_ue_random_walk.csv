@@ -1,0 +1,4 @@
+num;pos_ini_x_min;pos_ini_x_max;pos_ini_y_min;pos_ini_y_max;pos_ini_z_min;pos_ini_z_max;speed_m_s;mov_x_min;mov_x_max;mov_y_min;mov_y_max;mov_time_step_sec
+8;250;252;-25;25;1.5;2.0;3.0;250;252;-25;25;0.2s
+8;748;750;-25;25;1.5;2.0;3.0;748;750;-25;25;0.2s
+25;450;550;-50;50;1.5;2.0;3.0;450;550;-50;50;0.2s
