@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns3>
+ <default name="ns3::RadioBearerStatsCalculator::DlRlcOutputFilename" value="DlRlcStats.txt"/>
+ <default name="ns3::RadioBearerStatsCalculator::UlRlcOutputFilename" value="UlRlcStats.txt"/>
+ <default name="ns3::RadioBearerStatsCalculator::DlPdcpOutputFilename" value="DlPdcpStats.txt"/>
+ <default name="ns3::RadioBearerStatsCalculator::UlPdcpOutputFilename" value="UlPdcpStats.txt"/>
+ <default name="ns3::PhyStatsCalculator::DlRsrpSinrFilename" value="DlRsrpSinrStats.txt"/>
+ <default name="ns3::PhyStatsCalculator::UlSinrFilename" value="UlSinrStats.txt"/>
+ <default name="ns3::PhyStatsCalculator::UlInterferenceFilename" value="UlInterferenceStats.txt"/>
+ <default name="ns3::MacStatsCalculator::DlOutputFilename" value="DlMacStats.txt"/>
+ <default name="ns3::MacStatsCalculator::UlOutputFilename" value="UlMacStats.txt"/>
+ <default name="ns3::PhyTxStatsCalculator::DlTxOutputFilename" value="DlTxPhyStats.txt"/>
+ <default name="ns3::PhyTxStatsCalculator::UlTxOutputFilename" value= "UlTxPhyStats.txt"/> 
+ <default name="ns3::PhyRxStatsCalculator::DlRxOutputFilename" value= "DlRxPhyStats.txt"/>
+ <default name="ns3::PhyRxStatsCalculator::UlRxOutputFilename" value= "UlRxPhyStats.txt"/>
+ <default name="ns3::LteHexGridEnbTopologyHelper::SiteHeight" value= "30"/>
+ <default name="ns3::PfFfMacScheduler::CqiTimerThreshold" value= "1000"/>
+ <default name="ns3::PfFfMacScheduler::HarqEnabled" value= "true"/>
+ <default name="ns3::PfFfMacScheduler::UlGrantMcs" value= "0"/>
+ <global name="locationXRange" value="-500|1500" />
+ <global name="locationYRange" value="-300|300" /> 
+ <global name="locationZRange" value="1.5|2.0" />
+ <global name="nMacroEnbSites" value="6"/>
+ <global name="eNBAdjacencyMatrixFile" value="scratch/LTEHandoverSim/RealSce/real_sce_enb_adjacency_matrix.csv"/>
+ <global name="macroEnbSitesLocationFile" value="scratch/LTEHandoverSim/RealSce/real_sce_enb_locations.csv"/>
+ <global name="nUEs" value="40"/>
+ <global name="ueRandomWalkMobility" value=""/>
+ <global name="ueSimulatedMobility" value="scratch/LTEHandoverSim/RealSce/satt_6c_r_mob_5000_ped_veh_r2.tcl"/>
+ <global name="macroEnbTxPowerDbm" value="32"/>
+ <global name="macroEnbDlEarfcn" value="100"/>
+ <global name="macroEnbUlEarfcnMinusDlEarfcn" value="18000"/>
+ <global name="macroEnbBandwidth" value="25"/>
+ <global name="macroEnbAntennaModelType" value="ns3::IsotropicAntennaModel"/>
+ <global name="fadingTrace" value=""/>
+ <global name="hysteresisCoefficient" value="3"/>
+ <global name="TTT" value="40"/>
+ <global name="simTime" value="51"/>
+ <global name="cioList" value="0_0_0_0_0_0"/>
+ <global name="cioRange" value="-6.0|6.0"/>
+ <global name="envStepTime" value="0.2"/>
+ <global name="envCollectingWindow" value="0.05"/>
+ <global name="envRewardType" value="0"/>
+ <global name="userBlockageThr" value="0.5"/>
+ <global name="openGymPort" value="9999" />
+ <global name="outputTraceFiles" value="false"/>
+ <global name="epcDl" value="true"/>
+ <global name="epcUl" value="false"/>
+ <global name="useUdp" value="true"/>
+ <global name="numBearersPerUe" value="1"/>
+ <global name="p2phDataRate" value="100Mb/s"/>
+ <global name="p2phMTU" value="1500"/>
+ <global name="p2phDelay" value="0.010"/>
+ <global name="lteHelperScheduler" value="ns3::PfFfMacScheduler"/>
+ <global name="lteHelperFfrAlgorithm" value="ns3::LteFrNoOpAlgorithm"/>
+ <global name="lteHelperHandoverAlgorithm" value="ns3::A3RsrpHandoverAlgorithm"/>
+ <global name="lteHelperPathlossModel" value="ns3::Cost231PropagationLossModel"/> 
+ <global name="lteHelperFadingModel" value=""/>
+ <global name="lteHelperUseIdealRrc" value="true"/>
+ <global name="lteHelperAnrEnabled" value="true"/>
+ <global name="lteHelperEnbComponentCarrierManager" value="ns3::NoOpComponentCarrierManager"/>
+ <global name="lteHelperUeComponentCarrierManager" value="ns3::SimpleUeComponentCarrierManager"/>
+ <global name="lteHelperUseCa" value="false"/>
+ <global name="lteHelperNumberOfComponentCarriers" value="1"/>
+ <global name="lteHelperSpectrumChannelType" value="ns3::MultiModelSpectrumChannel"/>
+ <global name="srsPeriodicity" value="160"/>
+ <global name="updClientInterval" value="1"/>
+ <global name="udpClientPacketSize" value="12"/>
+ <global name="udpClientMaxPackets" value="1000000"/>
+ <global name="lteRlcUmMaxTxBufferSize" value="10240"/>
+</ns3>
