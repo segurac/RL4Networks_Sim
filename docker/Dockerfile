@@ -84,7 +84,8 @@ RUN cd ns-allinone-3.30 && ./download.py -n dev-mobility && mv dev-mobility ns-3
 RUN python3 -m pip install --user cppyy==2.4.2
 
 RUN cd ns-allinone-3.30/ns-3-mobility/ && \
-./ns3 configure --build-profile=optimized --enable-examples --enable-tests  --enable-mpi --enable-python
+    ./ns3 configure --build-profile=optimized --enable-examples --enable-tests  --enable-mpi --enable-python -- -DNS3_BINDINGS_INSTALL_DIR="/root/.local/lib/python3.10/site-packages"
+
 
 RUN cd ns-allinone-3.30/ns-3-mobility/ && ./ns3 build
 
@@ -119,5 +120,5 @@ RUN cd ns-allinone-3.30/ns-3-mobility/contrib/opengym/model/ns3gym && \
 
 RUN cd ns-allinone-3.30/ns-3-mobility/ && \
     git pull  && \
-    ./ns3 configure --build-profile=optimized --enable-examples --enable-tests  --enable-mpi --enable-python && \
+    ./ns3 configure --build-profile=optimized --enable-examples --enable-tests  --enable-mpi --enable-python -- -DNS3_BINDINGS_INSTALL_DIR="/root/.local/lib/python3.10/site-packages" && \
     ./ns3 build
