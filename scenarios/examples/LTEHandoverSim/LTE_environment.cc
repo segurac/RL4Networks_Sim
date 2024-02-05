@@ -47,6 +47,8 @@ using namespace ns3;
 
 namespace fs = std::filesystem; 
 
+NS_LOG_COMPONENT_DEFINE("LTEHandoverSim");
+
 // =========================================================================
 // AUX STRUCTS
 // =========================================================================
@@ -566,8 +568,8 @@ static ns3::GlobalValue g_lteRlcUmMaxTxBufferSize("lteRlcUmMaxTxBufferSize",
 // =========================================================================
 // MAIN SCRIPT
 // =========================================================================
-uint32_t RunNum;
-std::string ConfigFile;
+uint32_t RunNum = 1;
+std::string ConfigFile="scratch/LTEHandoverSim/POC/poc_config.xml";
 
 int main(int argc, char * argv[]) {
     std::cout << "======================================================" << std::endl;
@@ -903,6 +905,10 @@ int main(int argc, char * argv[]) {
         std::cout << "\t\tcio "<< count << " = " << *i << std::endl;
         count += 1;
     }
+    
+    CellIndividualOffset::setHysteresis(std::vector<double>(nMacroEnbSites,hysteresisCoefficient));
+    CellIndividualOffset::setTimeToTrigger( std::vector<uint16_t>(nMacroEnbSites,timeToTrigger));
+    
         
     // Set fading model
     NS_LOG_LOGIC(" ====== Setting up fading ====== ");

@@ -119,7 +119,8 @@ ADD https://api.github.com/repos/segurac/ns-3-dev-git/git/refs/heads/refactor/lt
 
 
 RUN cd ns-allinone-3.30/ns-3-mobility/ && \
-    git checkout refactor/lte_sim_ref  #remove this line in dev or master && \ 
+    git pull  && \
+    git checkout refactor/lte_sim_ref  && \ 
     git pull  && \
     ./ns3 configure --build-profile=optimized --enable-examples --enable-tests  --enable-mpi --enable-python && \
     ./ns3 build
