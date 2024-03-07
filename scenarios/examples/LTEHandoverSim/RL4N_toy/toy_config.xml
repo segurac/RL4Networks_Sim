@@ -17,14 +17,14 @@
  <default name="ns3::PfFfMacScheduler::CqiTimerThreshold" value= "1000"/>
  <default name="ns3::PfFfMacScheduler::HarqEnabled" value= "true"/>
  <default name="ns3::PfFfMacScheduler::UlGrantMcs" value= "0"/>
- <global name="locationXRange" value="-500|1500" />
- <global name="locationYRange" value="-300|300" />
+ <global name="locationXRange" value="0|2400" />
+ <global name="locationYRange" value="0|1600" />
  <global name="locationZRange" value="1.5|2.0" />
- <global name="nMacroEnbSites" value="3"/>
- <global name="eNBAdjacencyMatrixFile" value="scratch/LTEHandoverSim/POC/poc_enb_adjacency_matrix.csv"/>
- <global name="macroEnbSitesLocationFile" value="scratch/LTEHandoverSim/POC/poc_enb_locations.csv"/>
+ <global name="nMacroEnbSites" value="8"/>
+ <global name="eNBAdjacencyMatrixFile" value="scratch/LTEHandoverSim/RL4N_toy/toy_enb_adjacency_matrix.csv"/>
+ <global name="macroEnbSitesLocationFile" value="scratch/LTEHandoverSim/RL4N_toy/toy_enb_locations.csv"/>
  <global name="nUEs" value="41"/>
- <global name="ueRandomWalkMobility" value="scratch/LTEHandoverSim/POC/poc_ue_random_walk.csv"/>
+ <global name="ueRandomWalkMobility" value="scratch/LTEHandoverSim/RL4N_toy/toy_ue_random_walk.csv"/>
  <global name="ueSimulatedMobility" value=""/>
  <global name="macroEnbTxPowerDbm" value="20"/>
  <global name="macroEnbDlEarfcn" value="100"/>
@@ -34,9 +34,9 @@
  <global name="fadingTrace" value=""/>
  <global name="hysteresisCoefficient" value="3"/>
  <global name="TTT" value="40"/>
- <global name="simTime" value="60"/>
- <global name="cioList" value="0_0_0"/>
- <global name="cioRange" value="-6.0|5.0"/>
+ <global name="simTime" value="11"/>
+ <global name="cioList" value="0_0_0_0_0_0_0_0"/>
+ <global name="cioRange" value="-6.0|6.0"/>
  <global name="envStepTime" value="0.2"/>
  <global name="envCollectingWindow" value="0.05"/>
  <global name="envRewardType" value="0"/>
@@ -63,8 +63,8 @@
  <global name="lteHelperNumberOfComponentCarriers" value="1"/>
  <global name="lteHelperSpectrumChannelType" value="ns3::MultiModelSpectrumChannel"/>
  <global name="srsPeriodicity" value="160"/>
- <global name="updClientInterval" value="10"/>
- <global name="udpClientPacketSize" value="1200"/>
+ <global name="updClientInterval" value="1"/>
+ <global name="udpClientPacketSize" value="12"/>
  <global name="udpClientMaxPackets" value="10000000"/>
  <global name="lteRlcUmMaxTxBufferSize" value="10240"/>
 </ns3>

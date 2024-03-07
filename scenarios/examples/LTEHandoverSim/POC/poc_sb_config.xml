@@ -34,9 +34,9 @@
  <global name="fadingTrace" value=""/>
  <global name="hysteresisCoefficient" value="3"/>
  <global name="TTT" value="40"/>
- <global name="simTime" value="60"/>
+ <global name="simTime" value="11"/>
  <global name="cioList" value="0_0_0"/>
- <global name="cioRange" value="-6.0|5.0"/>
+ <global name="cioRange" value="-6.0|6.0"/>
  <global name="envStepTime" value="0.2"/>
  <global name="envCollectingWindow" value="0.05"/>
  <global name="envRewardType" value="0"/>

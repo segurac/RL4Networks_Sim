@@ -1,15 +1,15 @@
-from typing import Callable
-
-from scenarios.examples.Proof_of_concept.agent.poc_process import POC_Process
+from src.processes.poc_process import POC_Process
+from src.processes.stable_baseline_process import StableBaselineProcess
 
 
 class ScenarioFactory(object):
 
     def __init__(self):
         # Here new processes have to be included
-        # All the processes executing some scenario should inherit from base Process class
+        # All the processes should inherit from base Process class
         self.processes = {
-            'poc': POC_Process
+            POC_Process.name: POC_Process,
+            StableBaselineProcess.name: StableBaselineProcess
         }
 
     def get_scenario(self, name: str):

@@ -48,9 +48,10 @@ namespace ns3 {
         NS_LOG_FUNCTION(this);
     }
 
-    MyGymEnv::MyGymEnv(double stepTime, uint32_t N1, uint32_t N2, uint16_t N3, 
-                       double collectingWindow, double blockThr, uint16_t rewardType, 
-                       uint32_t cioNumber, std::vector < double > cioRange) {
+    MyGymEnv::MyGymEnv(double stepTime, uint32_t N1, uint32_t N2, uint16_t N3,
+                       double collectingWindow, double blockThr, uint16_t rewardType,
+                       uint32_t cioNumber, std::vector < double > cioRange, 
+                       std::vector < int > nodeDegrees) {
         NS_LOG_FUNCTION(this);
         collect = 0;
         collecting_window = collectingWindow;  // Expressed in seconds
@@ -64,12 +65,18 @@ namespace ns3 {
         m_dlThroughput = 0;
         m_cioNumber = cioNumber;
         m_cioRange = cioRange;
+        m_nodeDegrees = nodeDegrees; 
         m_cellFrequency.assign(m_cellCount, 0);
         rewards.assign(3, 0);
+        reward_per_cio.assign(cioNumber, 0.0);
+        last_reward_per_cio.assign(cioNumber, 0.0);
         m_dlThroughputVec.assign(m_cellCount, 0);
         m_UesNum.assign(m_cellCount, 0);
         std::vector < uint32_t > dummyVec(29, 0);
+        std::vector < float > dummyVecF(29, 0.0);
         m_MCSPen.assign(m_cellCount, dummyVec);
+        m_MCS_nRB.assign(m_cellCount, dummyVec);
+        m_MCS_bits.assign(m_cellCount, dummyVecF);
         Simulator::Schedule(Seconds(1), & MyGymEnv::ScheduleNextStateRead, this);
         Simulator::Schedule(Seconds(1 - collecting_window), & MyGymEnv::Start_Collecting, this);
         UserThrouput.clear();
@@ -110,7 +117,7 @@ namespace ns3 {
         MyGymEnv::GetActionSpace() {
             NS_LOG_FUNCTION(this);
             float low = m_cioRange.at(0);
-            float high = m_cioRange.at(1); // CIO levels 
+            float high = m_cioRange.at(1); // CIO levels
             std::vector < uint32_t > shape = { m_cioNumber, }; //number of required relative CIOs
             std::string dtype = TypeNameGet < float > ();
             Ptr < OpenGymBoxSpace > space = CreateObject < OpenGymBoxSpace > (low, high, shape, dtype);
@@ -187,6 +194,7 @@ namespace ns3 {
 
     Ptr < OpenGymDataContainer >
         MyGymEnv::GetObservation() {
+            std::cout << "GET OBSERVATIONS" << std::endl;
             NS_LOG_FUNCTION(this);
             calculate_rewards();
 
@@ -236,7 +244,7 @@ namespace ns3 {
 
             obsContainer -> Add("MCSPen", mcsPenContainer);
 
-            //report other reward functions 
+            //report other reward functions
             shape = { 3, };
             box = CreateObject < OpenGymBoxContainer < float > > (shape);
             box -> SetData(rewards);
@@ -249,6 +257,7 @@ namespace ns3 {
 
     void
     MyGymEnv::resetObs() {
+        std::cout << "RESET OBS" << std::endl;
         NS_LOG_FUNCTION(this);
         m_rbUtil.assign(m_cellCount, 0);
         rewards.assign(3, 0);
@@ -258,7 +267,10 @@ namespace ns3 {
         UserThrouput.clear();
         m_UesNum.assign(m_cellCount, 0);
         std::vector < uint32_t > dummyVec(29, 0);
+        std::vector < float > dummyVecF(29, 0.0);
         m_MCSPen.assign(m_cellCount, dummyVec);
+        m_MCS_nRB.assign(m_cellCount, dummyVec);
+        m_MCS_bits.assign(m_cellCount, dummyVecF);
         NS_LOG_LOGIC("%%%%%%%% Stop collecting %%%%%%%%  time= " << Simulator::Now().GetSeconds() << " sec");
         collect = 0;
         Simulator::Schedule(Seconds(m_interval - collecting_window), & MyGymEnv::Start_Collecting, this);
@@ -311,7 +323,7 @@ namespace ns3 {
         uint32_t rbSUM = 0;
         for (uint32_t idx = 0; idx < m_cellCount; idx++) {
             rbSUM = rbSUM + m_rbUtil.at(idx);
-            NS_LOG_LOGIC("m_rbUtil.at(idx): " << m_rbUtil.at(idx));
+            std::cout << "m_rbUtil.at(" << idx << "): " << m_rbUtil.at(idx) << ", " << m_nRBTotal << std::endl;
             NS_LOG_LOGIC("rbSUM : " << rbSUM);
         }
 
@@ -325,11 +337,55 @@ namespace ns3 {
         reward = 1 - ((float) Blocked_Users_num / m_userCount);
         rewards.at(2) = reward;
         NS_LOG_LOGIC("GetReward: rewards.at(2): " << rewards.at(2));
+
+        for (int kk1=0; kk1 < int(m_cellCount); kk1++){
+            for (int kk2=0; kk2 < 29; kk2++){
+                std::cout << "Cell " << (kk1 + 1) << ", MSC " << kk2 << ": " << m_MCSPen[kk1][kk2] << ", " << m_MCS_nRB[kk1][kk2] << ", " << m_MCS_bits[kk1][kk2] << std::endl;
+            }
+        }
+
+        // CIO reward
+        std::vector< std::vector<int>  > adj_matr = CellIndividualOffset::getAdjacencyMatrix();
+        int count = 0;
+        float weight_kk1;
+        float weight_kk2;
+        for (int kk1 = 0; kk1 < int(m_cellCount); kk1++) {
+            if (m_nodeDegrees.at(kk1) == 0){
+                weight_kk1 = 1.;
+            } else{
+                weight_kk1 = 1. / m_nodeDegrees.at(kk1);
+            }
+            for (int kk2 = 0; kk2 < kk1; kk2++){
+                if (m_nodeDegrees.at(kk2) == 0){
+                    weight_kk2 = 1.;
+                } else{
+                    weight_kk2 = 1. / m_nodeDegrees.at(kk2);
+                }
+                if (adj_matr.at(kk1).at(kk2) > 0){
+                    
+                    reward_per_cio.at(count) = (weight_kk1 * m_dlThroughputVec.at(kk1) + weight_kk2 * m_dlThroughputVec.at(kk2));
+                    std::cout << "REWARD CIO: " << count << " = " <<  reward_per_cio.at(count) << std::endl;
+                    std::cout << "CELL1: " << kk1 << ", " << weight_kk1 << ", CELL2: " << kk2 << ", " << weight_kk2 << std::endl;
+                    count += 1;
+                }
+            }
+        }
+        std::stringstream ss;
+        for(size_t i = 0; i < reward_per_cio.size(); ++i){
+            if(i != 0){
+                ss << "|";
+            }
+            ss << reward_per_cio.at(i);
+        }
+        std::cout << "===================> " << ss.str() << std::endl;
+
     }
 
     float
     MyGymEnv::GetReward() {
         NS_LOG_FUNCTION(this);
+
+        std::cout << "GET REWARD INFO" << std::endl;
 
         float reward = 0;
 
@@ -350,7 +406,18 @@ namespace ns3 {
     std::string
     MyGymEnv::GetExtraInfo() {
         NS_LOG_FUNCTION(this);
-        return "";
+        std::cout << "GET EXTRA INFO" << std::endl;
+        
+        std::stringstream ss;
+        for(size_t i = 0; i < reward_per_cio.size(); ++i){
+            if(i != 0){
+                ss << "|";
+            }
+            ss << reward_per_cio.at(i) ;
+            last_reward_per_cio.at(i) = reward_per_cio.at(i);
+        }
+        reward_per_cio.assign(m_cioNumber, 0.0);
+        return ss.str();
     }
 
     bool
@@ -422,6 +489,12 @@ namespace ns3 {
 
     }
 
+    void MyGymEnv::GetUEReportStats(Ptr < MyGymEnv > gymEnv,
+            const uint16_t rnti, const uint16_t cell_id, const double rsrpDbm, const double rsrqDb, const bool isServingCell, const unsigned char var_char){
+        // std::cout << "*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*" << std::endl;
+        // std::cout << "rnti: " << rnti << ", cell_id: " << cell_id << ", rsrpDbm: " << rsrpDbm << ", rsrqDb" << rsrqDb << ", isServingCell " << isServingCell << ", var: " << var_char << std::endl;
+    }
+
     void
     MyGymEnv::GetPhyStats(Ptr < MyGymEnv > gymEnv,
         const PhyTransmissionStatParameters params) {
@@ -444,10 +517,16 @@ namespace ns3 {
 
             // Get MCSPen
             gymEnv -> m_MCSPen.at(idx).at(params.m_mcs) = gymEnv -> m_MCSPen.at(idx).at(params.m_mcs) + 1;
+            gymEnv -> m_MCS_nRB.at(idx).at(params.m_mcs) = gymEnv -> m_MCS_nRB.at(idx).at(params.m_mcs) + nRBs;
+            gymEnv -> m_MCS_bits.at(idx).at(params.m_mcs) = gymEnv -> m_MCS_bits.at(idx).at(params.m_mcs) + (params.m_size) * 8.0 / 1024.0 / 1024.0 / gymEnv -> collecting_window;
             NS_LOG_LOGIC("Frequency at cell " << idx << " is " << gymEnv -> m_cellFrequency.at(idx));
             NS_LOG_LOGIC("DLThroughput at cell " << idx << " is " << gymEnv -> m_dlThroughputVec.at(idx));
             NS_LOG_LOGIC("NRB at cell " << idx << " is " << gymEnv -> m_rbUtil.at(idx));
             NS_LOG_LOGIC("MCS frequency at cell " << idx << " of MCS " << uint32_t(params.m_mcs) << " is " << gymEnv -> m_MCSPen[idx][params.m_mcs]);
+            // std::cout << "Frequency at cell " << idx << " is " << gymEnv -> m_cellFrequency.at(idx) << std::endl;
+            // std::cout << "DLThroughput at cell " << idx << " is " << gymEnv -> m_dlThroughputVec.at(idx) << std::endl;
+            // std::cout << "NRB at cell " << idx << " is " << gymEnv -> m_rbUtil.at(idx) << std::endl;
+            // std::cout << "MCS frequency at cell " << idx << " of MCS " << uint32_t(params.m_mcs) << " is " << gymEnv -> m_MCSPen[idx][params.m_mcs] << std::endl;
         }
     }
 

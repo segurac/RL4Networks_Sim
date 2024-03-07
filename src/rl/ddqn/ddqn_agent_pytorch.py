@@ -7,7 +7,8 @@ from collections import deque
 import torch
 from torch.utils.tensorboard import SummaryWriter
 
-from scenarios.examples.Proof_of_concept.agent.poc_env import POC_Env
+from src.common.custom_env import CustomEnv
+
 
 class QBrain(torch.nn.Module):
 
@@ -36,20 +37,20 @@ class QBrain(torch.nn.Module):
 
 
 class DDQNAgent:
-    def __init__(self, state_size: int, action_size: int, device: str):
+    def __init__(self, state_size: int, action_size: int, device: str, memory_size: int, gamma: float,
+                 epsilon_start: float, epsilon_min: float, epsilon_decay: float, learning_rate: float,
+                 hidden_layers: int, hidden_neurons: int):
         self.state_size = state_size
         self.action_size = action_size
         self.device = device
-        self.memory = deque(maxlen=20000)
-        self.gamma = 0.95  # Discount rate
-        self.epsilon = 1.0  # At the begining
-        self.epsilon_min = 0.01
-        self.epsilon_decay = 0.9995
-        self.learning_rate = 0.001
+        self.memory = deque(maxlen=memory_size)
+        self.gamma = gamma  # Discount rate
+        self.epsilon = epsilon_start  # At the begining
+        self.epsilon_min = epsilon_min
+        self.epsilon_decay = epsilon_decay
+        self.learning_rate = learning_rate
         self.Prev_Mean = 0  # initial mean of the targets (for target normalization)
         self.Prev_std = 1  # initial std of the targets (for target normalization)
-        hidden_layers = 3  # This number has to include also the input and output layers
-        hidden_neurons = 24
         self.model = QBrain(self.state_size, self.action_size, hidden_layers, hidden_neurons).to(device)
         self.target_model = self.model = QBrain(self.state_size, self.action_size, hidden_layers, hidden_neurons).to(device)
         self.update_target_model()
@@ -67,7 +68,7 @@ class DDQNAgent:
     def update_target_model(self):
         # copy weights from the CIO selection network to target network
         self.target_model.load_state_dict(self.model.state_dict())
-   
+
     def remember(self, state, action, reward, next_state, done):
         self.memory.append((state, action, reward, next_state, done))
 
@@ -134,7 +135,7 @@ class DDQNAgent:
         # self.model.save_weights(name)
 
 
-def simulation(sim_agent: DDQNAgent, sim_env: POC_Env, episode_number: int, batch_size: int,
+def simulation(sim_agent: DDQNAgent, sim_env: CustomEnv, episode_number: int, batch_size: int,
                save_rewards: bool = False) -> None:
     """DQN Simulation workflow
 

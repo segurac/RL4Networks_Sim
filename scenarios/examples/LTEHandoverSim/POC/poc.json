@@ -1,0 +1,35 @@
+{
+  "number_of_episodes": 200,
+  "max_steps_per_episode": 50,
+  "evaluate_agent_each_n_steps": 150,
+  "n_eval_episodes": 1,
+  "max_msc_idx": 10,
+  "sum_up_mcs": false,
+  "step_CIO": 3,
+  "max_troughput_normalization": 18,
+  "device": "cpu",
+  "agent_type": "ddqn",
+  "agents": {
+    "ddqn": {
+      "batch_size": 32,
+      "learning_rate": 0.001,
+      "memory_size": 20000,
+      "gamma": 0.95,
+      "epsilon_start": 1,
+      "epsilon_min": 0.01,
+      "epsilon_decay": 0.9995,
+      "hidden_layers": 3,
+      "hidden_neurons": 24
+    },
+    "td3": {
+      "baseline": false,
+      "hidden_neurons": [400, 300]
+    },
+    "a2c": {
+    }
+  },
+  "tensorboard_log_dir": "./DDQN_poc_tensorboard/",
+  "model_path": "DDQN_poc_r1_{}",
+  "ns3_path": "/home/msa/NS3/repos/ns-3-allinone/ns-3-dev-git",
+  "launch_sim_file": ""
+}

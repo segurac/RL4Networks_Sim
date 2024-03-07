@@ -10,7 +10,7 @@
  <default name="ns3::MacStatsCalculator::DlOutputFilename" value="DlMacStats.txt"/>
  <default name="ns3::MacStatsCalculator::UlOutputFilename" value="UlMacStats.txt"/>
  <default name="ns3::PhyTxStatsCalculator::DlTxOutputFilename" value="DlTxPhyStats.txt"/>
- <default name="ns3::PhyTxStatsCalculator::UlTxOutputFilename" value= "UlTxPhyStats.txt"/> 
+ <default name="ns3::PhyTxStatsCalculator::UlTxOutputFilename" value= "UlTxPhyStats.txt"/>
  <default name="ns3::PhyRxStatsCalculator::DlRxOutputFilename" value= "DlRxPhyStats.txt"/>
  <default name="ns3::PhyRxStatsCalculator::UlRxOutputFilename" value= "UlRxPhyStats.txt"/>
  <default name="ns3::LteHexGridEnbTopologyHelper::SiteHeight" value= "30"/>
@@ -18,7 +18,7 @@
  <default name="ns3::PfFfMacScheduler::HarqEnabled" value= "true"/>
  <default name="ns3::PfFfMacScheduler::UlGrantMcs" value= "0"/>
  <global name="locationXRange" value="-500|1500" />
- <global name="locationYRange" value="-300|300" /> 
+ <global name="locationYRange" value="-300|300" />
  <global name="locationZRange" value="1.5|2.0" />
  <global name="nMacroEnbSites" value="6"/>
  <global name="eNBAdjacencyMatrixFile" value="scratch/LTEHandoverSim/RealSce/real_sce_enb_adjacency_matrix.csv"/>
@@ -53,7 +53,7 @@
  <global name="lteHelperScheduler" value="ns3::PfFfMacScheduler"/>
  <global name="lteHelperFfrAlgorithm" value="ns3::LteFrNoOpAlgorithm"/>
  <global name="lteHelperHandoverAlgorithm" value="ns3::A3RsrpHandoverAlgorithm"/>
- <global name="lteHelperPathlossModel" value="ns3::Cost231PropagationLossModel"/> 
+ <global name="lteHelperPathlossModel" value="ns3::Cost231PropagationLossModel"/>
  <global name="lteHelperFadingModel" value=""/>
  <global name="lteHelperUseIdealRrc" value="true"/>
  <global name="lteHelperAnrEnabled" value="true"/>

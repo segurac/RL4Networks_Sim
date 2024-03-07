@@ -45,7 +45,7 @@
 
 using namespace ns3;
 
-namespace fs = std::filesystem; 
+namespace fs = std::filesystem;
 
 NS_LOG_COMPONENT_DEFINE("LTEHandoverSim");
 
@@ -95,11 +95,23 @@ void NotifyHandoverEndOkEnb(std::string context,
         std::endl;
 }
 
+std::vector<int> compute_node_degrees(std::vector<std::vector<int>>& adjacency_matrix) {
+    std::vector<int> degrees;
+    for (const auto& row : adjacency_matrix) {
+        int sum = 0;
+        for (int val : row) {
+            sum += val;
+        }
+        degrees.push_back(sum);
+    }
+    return degrees;
+}
+
 std::vector < double >
     convertStringtoDouble(std::string cioList, uint16_t rep, std::string delimiter) {
         std::vector < double > v;
         double tempVal;
-        
+
         size_t pos = cioList.find(delimiter);
         std::string token;
         while (pos != std::string::npos) {
@@ -113,11 +125,31 @@ std::vector < double >
         }
 
         tempVal = std::stod(cioList);
-        // Every eNB has 3 sectors
         for (uint16_t i = 0; i < rep; i++)
             v.push_back(tempVal);
-        //v.push_back(tempVal);
-        //v.push_back(tempVal);
+        return v;
+    }
+
+std::vector < std::string >
+    convertStringtoListString(std::string longString, uint16_t rep, std::string delimiter) {
+        std::vector < std::string > v;
+        std::string tempVal;
+
+        size_t pos = longString.find(delimiter);
+        std::string token;
+        while (pos != std::string::npos) {
+            token = longString.substr(0, pos);
+            tempVal = token;
+            for (uint16_t i = 0; i < rep; i++)
+                v.push_back(tempVal);
+
+            longString.erase(0, pos + delimiter.length());
+            pos = longString.find(delimiter);
+        }
+
+        tempVal = longString;
+        for (uint16_t i = 0; i < rep; i++)
+            v.push_back(tempVal);
         return v;
     }
 
@@ -125,28 +157,28 @@ std::vector <random_walk_params> load_random_walk_params_csv(fs::path csv_path)
 {
     std::vector<random_walk_params> output;
 
-    // File pointer 
-    std::ifstream file; 
-  
-    // Open an existing file 
-    file.open(csv_path); 
-  
+    // File pointer
+    std::ifstream file;
+
+    // Open an existing file
+    file.open(csv_path);
+
     int i = 0;
     int j = 0;
-    std::string line, word, temp; 
+    std::string line, word, temp;
 
     // This allows jumping the header line
     std::getline(file, line);
 
-    // read an entire row and 
-    // store it in a string variable 'line' 
+    // read an entire row and
+    // store it in a string variable 'line'
     while (std::getline(file, line)){
         std::stringstream s(line);
-        j = 0;    
+        j = 0;
         random_walk_params tmp;
-        while (std::getline(s, word, ';')) { 
-            // add all the column data 
-            // of a row to a vector 
+        while (std::getline(s, word, ';')) {
+            // add all the column data
+            // of a row to a vector
             if (j == 0){
                 tmp.number = std::stoi(word);
             } else if (j == 1)
@@ -197,11 +229,11 @@ std::vector <random_walk_params> load_random_walk_params_csv(fs::path csv_path)
             {
                 tmp.mov_time_step_sec = word;
             }
-            j += 1; 
-        } 
+            j += 1;
+        }
         output.push_back(tmp);
         i += 1;
-    }  
+    }
     file.close();
 
     int count = 0;
@@ -226,36 +258,36 @@ std::vector <random_walk_params> load_random_walk_params_csv(fs::path csv_path)
     return output;
 }
 
-std::vector<std::vector<int>> load_adjacency_matrix_csv(fs::path csv_path, int cell_num) 
-{ 
-  
-    // File pointer 
-    std::ifstream file; 
-  
-    // Open an existing file 
-    file.open(csv_path); 
-  
-    // Read the Data from the file 
-    // as int Vector 
+std::vector<std::vector<int>> load_adjacency_matrix_csv(fs::path csv_path, int cell_num)
+{
+
+    // File pointer
+    std::ifstream file;
+
+    // Open an existing file
+    file.open(csv_path);
+
+    // Read the Data from the file
+    // as int Vector
     std::vector<std::vector<int>> adjacency_matrix;
     adjacency_matrix.reserve(cell_num); // Reserve space for 'cell_num' rows to improve efficiency
 
-    std::string line, word, temp; 
+    std::string line, word, temp;
 
-    // read an entire row and 
-    // store it in a string variable 'line' 
+    // read an entire row and
+    // store it in a string variable 'line'
     while (std::getline(file, line)){
         std::stringstream s(line);
         std::vector<int> row;
         row.reserve(cell_num);
 
-        while (std::getline(s, word, ';')) { 
-            // add all the column data 
-            // of a row to a vector 
+        while (std::getline(s, word, ';')) {
+            // add all the column data
+            // of a row to a vector
             row.push_back(std::stoi(word));
-        } 
+        }
         adjacency_matrix.push_back(row);
-    }  
+    }
     file.close();
 
     std::cout << "\tAdjacency Matrix:" << std::endl;
@@ -265,40 +297,40 @@ std::vector<std::vector<int>> load_adjacency_matrix_csv(fs::path csv_path, int c
         }
     }
     return adjacency_matrix;
-} 
+}
 
-double** load_enb_location_csv(fs::path csv_path, int cell_num) 
-{ 
-    // File pointer 
-    std::ifstream file; 
-  
-    // Open an existing file 
-    file.open(csv_path); 
-  
-    // Read the Data from the file 
-    // as int Vector 
+double** load_enb_location_csv(fs::path csv_path, int cell_num)
+{
+    // File pointer
+    std::ifstream file;
+
+    // Open an existing file
+    file.open(csv_path);
+
+    // Read the Data from the file
+    // as int Vector
     double** locations = new double*[cell_num];
     int i = 0;
     int j = 0;
-    std::string line, word, temp; 
+    std::string line, word, temp;
 
-    // read an entire row and 
-    // store it in a string variable 'line' 
+    // read an entire row and
+    // store it in a string variable 'line'
     while (std::getline(file, line)){
         locations[i] = new double[3];
         std::stringstream s(line);
-        j = 0;      
-        while (std::getline(s, word, ';')) { 
-            // add all the column data 
-            // of a row to a vector 
+        j = 0;
+        while (std::getline(s, word, ';')) {
+            // add all the column data
+            // of a row to a vector
             locations[i][j] = std::stod(word);
-            j += 1; 
-        } 
+            j += 1;
+        }
         i += 1;
-    }  
+    }
     file.close();
     return locations;
-} 
+}
 
 // =========================================================================
 // STATIC METHODS FOR GLOBAL VARIABLES
@@ -568,8 +600,8 @@ static ns3::GlobalValue g_lteRlcUmMaxTxBufferSize("lteRlcUmMaxTxBufferSize",
 // =========================================================================
 // MAIN SCRIPT
 // =========================================================================
-uint32_t RunNum = 1;
-std::string ConfigFile="scratch/LTEHandoverSim/POC/poc_config.xml";
+uint32_t RunNum;
+std::string ConfigFile="";
 
 int main(int argc, char * argv[]) {
     std::cout << "======================================================" << std::endl;
@@ -590,18 +622,19 @@ int main(int argc, char * argv[]) {
     Config::SetDefault ("ns3::ConfigStore::Filename", StringValue (full_path));
     Config::SetDefault ("ns3::ConfigStore::Mode", StringValue ("Load"));
     Config::SetDefault ("ns3::ConfigStore::FileFormat", StringValue ("Xml"));
-    
+
     ConfigStore inputConfig;
     inputConfig.ConfigureDefaults();
 
     if (RunNum < 1) RunNum = 1;
-    SeedManager::SetSeed(1);
+    SeedManager::SetSeed(RunNum);
     SeedManager::SetRun(RunNum);
 
     // **************************************
     // Recover global values
     // **************************************
     std::cout << "Environment parameters: " << std::endl;
+    std::cout << "RunNum: " << RunNum << std::endl;
     UintegerValue uintegerValue;
     IntegerValue integerValue;
     DoubleValue doubleValue;
@@ -634,11 +667,24 @@ int main(int argc, char * argv[]) {
         ueRandomWalkMobility = tmp2;
     } else {
         ueRandomWalkMobility = ns3_path / tmp2;
+        std::string delimiter = "|";
+        std::vector < std::string > files = convertStringtoListString(ueRandomWalkMobility, 1, delimiter);
+        if (files.size() == 1){
+            ueRandomWalkMobility = files.at(0);
+         } else {
+            int a = RunNum / files.size();
+            ueRandomWalkMobility = files.at(a);
+         }
+    
     };
     std::cout << "\tueRandomWalkMobility: " << ueRandomWalkMobility << std::endl;
     std::vector <random_walk_params> randomWalkInfo;
     if (!ueRandomWalkMobility.empty()){
         randomWalkInfo = load_random_walk_params_csv(ueRandomWalkMobility);
+        nUEs = 0;
+        for (auto i = randomWalkInfo.begin(); i != randomWalkInfo.end(); ++i){
+            nUEs += (*i).number;
+        }
     }
     GlobalValue::GetValueByName("ueSimulatedMobility", stringValue);
     tmp1 = stringValue.Get();
@@ -675,11 +721,12 @@ int main(int argc, char * argv[]) {
         }
     }
     std::cout << "\tNumber of Edges (ones in Adj. Matrix): " << nEdgeNumber << std::endl;
+    std::vector<int> nodeDegrees = compute_node_degrees(adjacency_matrix);
 
     GlobalValue::GetValueByName("macroEnbTxPowerDbm", doubleValue);
     double macroEnbTxPowerDbm = doubleValue.Get();
     std::cout << "\tmacroEnbTxPowerDbm: " << macroEnbTxPowerDbm << std::endl;
-    
+
     GlobalValue::GetValueByName("macroEnbDlEarfcn", uintegerValue);
     uint32_t macroEnbDlEarfcn = uintegerValue.Get();
     std::cout << "\tmacroEnbDlEarfcn: " << macroEnbDlEarfcn << std::endl;
@@ -687,7 +734,7 @@ int main(int argc, char * argv[]) {
     GlobalValue::GetValueByName("macroEnbUlEarfcnMinusDlEarfcn", uintegerValue);
     uint32_t macroEnbUlEarfcnMinusDlEarfcn = uintegerValue.Get();
     std::cout << "\tmacroEnbUlEarfcnMinusDlEarfcn: " << macroEnbUlEarfcnMinusDlEarfcn << std::endl;
-    
+
     GlobalValue::GetValueByName("macroEnbBandwidth", uintegerValue);
     uint16_t macroEnbBandwidth = uintegerValue.Get();
     std::cout << "\tmacroEnbBandwidth: " << macroEnbBandwidth << std::endl;
@@ -699,11 +746,11 @@ int main(int argc, char * argv[]) {
     GlobalValue::GetValueByName("fadingTrace", stringValue);
     std::string fadingTrace = stringValue.Get();
     std::cout << "\tfadingTrace: " << fadingTrace << std::endl;
-    
+
     GlobalValue::GetValueByName("hysteresisCoefficient", doubleValue);
     double hysteresisCoefficient = doubleValue.Get();
     std::cout << "\thysteresisCoefficient: " << hysteresisCoefficient << std::endl;
-    
+
     GlobalValue::GetValueByName("TTT", doubleValue);
     double timeToTrigger = doubleValue.Get();
     std::cout << "\ttimeToTrigger: " << timeToTrigger << std::endl;
@@ -715,11 +762,11 @@ int main(int argc, char * argv[]) {
     GlobalValue::GetValueByName("cioRange", stringValue);
     std::string cioRange = stringValue.Get();
     std::cout << "\tcioRange: " << cioRange << std::endl;
-    
+
     GlobalValue::GetValueByName("simTime", doubleValue);
     double simTime = doubleValue.Get();
     std::cout << "\tsimTime: " << simTime << std::endl;
-    
+
     GlobalValue::GetValueByName("envStepTime", doubleValue);
     double envStepTime = doubleValue.Get();
     std::cout << "\tenvStepTime: " << envStepTime << std::endl;
@@ -735,27 +782,27 @@ int main(int argc, char * argv[]) {
     GlobalValue::GetValueByName("userBlockageThr", doubleValue);
     double userBlockageThr = doubleValue.Get();
     std::cout << "\tuserBlockageThr: " << userBlockageThr << std::endl;
-    
+
     GlobalValue::GetValueByName("openGymPort", uintegerValue);
     uint16_t openGymPort = uintegerValue.Get();
     std::cout << "\topenGymPort: " << openGymPort << std::endl;
-    
+
     GlobalValue::GetValueByName("outputTraceFiles", booleanValue);
     bool outputTraceFiles = booleanValue.Get();
     std::cout << "\toutputTraceFiles: " << outputTraceFiles << std::endl;
-    
+
     GlobalValue::GetValueByName("epcDl", booleanValue);
     bool epcDl = booleanValue.Get();
     std::cout << "\tepcDl: " << epcDl << std::endl;
-    
+
     GlobalValue::GetValueByName("epcUl", booleanValue);
     bool epcUl = booleanValue.Get();
     std::cout << "\tepcUl: " << epcUl << std::endl;
-    
+
     GlobalValue::GetValueByName("useUdp", booleanValue);
     bool useUdp = booleanValue.Get();
     std::cout << "\tuseUdp: " << useUdp << std::endl;
-    
+
     GlobalValue::GetValueByName("numBearersPerUe", uintegerValue);
     uint16_t numBearersPerUe = uintegerValue.Get();
     std::cout << "\tnumBearersPerUe: " << numBearersPerUe << std::endl;
@@ -779,11 +826,11 @@ int main(int argc, char * argv[]) {
     GlobalValue::GetValueByName("lteHelperFfrAlgorithm", stringValue);
     std::string lteHelperFfrAlgorithm = stringValue.Get();
     std::cout << "\tns3::LteHelper::FfrAlgorithm: " << lteHelperFfrAlgorithm << std::endl;
-    
+
     GlobalValue::GetValueByName("lteHelperHandoverAlgorithm", stringValue);
     std::string lteHelperHandoverAlgorithm = stringValue.Get();
     std::cout << "\tns3::LteHelper::HandoverAlgorithm: " << lteHelperHandoverAlgorithm << std::endl;
-    
+
     GlobalValue::GetValueByName("lteHelperPathlossModel", stringValue);
     std::string lteHelperPathlossModel = stringValue.Get();
     std::cout << "\tns3::LteHelper::PathlossModel: " << lteHelperPathlossModel << std::endl;
@@ -795,11 +842,11 @@ int main(int argc, char * argv[]) {
     GlobalValue::GetValueByName("lteHelperUseIdealRrc", booleanValue);
     bool lteHelperUseIdealRrc = booleanValue.Get();
     std::cout << "\tns3::LteHelper::UseIdealRrc: " << lteHelperUseIdealRrc << std::endl;
-    
+
     GlobalValue::GetValueByName("lteHelperAnrEnabled", booleanValue);
     bool lteHelperAnrEnabled = booleanValue.Get();
     std::cout << "\tns3::LteHelper::AnrEnabled: " << lteHelperAnrEnabled << std::endl;
-    
+
     GlobalValue::GetValueByName("lteHelperEnbComponentCarrierManager", stringValue);
     std::string lteHelperEnbComponentCarrierManager = stringValue.Get();
     std::cout << "\tns3::LteHelper::EnbComponentCarrierManager: " << lteHelperEnbComponentCarrierManager << std::endl;
@@ -807,7 +854,7 @@ int main(int argc, char * argv[]) {
     GlobalValue::GetValueByName("lteHelperUeComponentCarrierManager", stringValue);
     std::string lteHelperUeComponentCarrierManager = stringValue.Get();
     std::cout << "\tns3::LteHelper::UeComponentCarrierManager: " << lteHelperUeComponentCarrierManager << std::endl;
-    
+
     GlobalValue::GetValueByName("lteHelperUseCa", booleanValue);
     bool lteHelperUseCa = booleanValue.Get();
     std::cout << "\tns3::LteHelper::UseCa: " << lteHelperUseCa << std::endl;
@@ -819,7 +866,7 @@ int main(int argc, char * argv[]) {
     GlobalValue::GetValueByName("lteHelperSpectrumChannelType", stringValue);
     std::string lteHelperSpectrumChannelType = stringValue.Get();
     std::cout << "\tns3::LteHelper::SpectrumChannelType: " << lteHelperSpectrumChannelType << std::endl;
-    
+
     GlobalValue::GetValueByName("srsPeriodicity", uintegerValue);
     uint16_t srsPeriodicity = uintegerValue.Get();
     std::cout << "\tns3::LteEnbRrc::SrsPeriodicity: " << srsPeriodicity << std::endl;
@@ -869,8 +916,8 @@ int main(int argc, char * argv[]) {
     std::string delimiter = "|";
     std::vector < double > cioRangeDouble = convertStringtoDouble(cioRange, 1, delimiter);
     Ptr < OpenGymInterface > openGymInterface = CreateObject < OpenGymInterface > (openGymPort);
-    Ptr < MyGymEnv > myGymEnv = CreateObject < MyGymEnv > (envStepTime, nMacroEnbSites, nUEs, macroEnbBandwidth, envCollectingWindow, 
-                                                           userBlockageThr, envRewardType, nEdgeNumber, cioRangeDouble);
+    Ptr < MyGymEnv > myGymEnv = CreateObject < MyGymEnv > (envStepTime, nMacroEnbSites, nUEs, macroEnbBandwidth, envCollectingWindow,
+                                                           userBlockageThr, envRewardType, nEdgeNumber, cioRangeDouble, nodeDegrees);
     myGymEnv -> SetOpenGymInterface(openGymInterface);
 
     // **************************************
@@ -887,11 +934,6 @@ int main(int argc, char * argv[]) {
     lteHelper -> SetHandoverAlgorithmAttribute("Hysteresis", DoubleValue(hysteresisCoefficient));
     lteHelper -> SetHandoverAlgorithmAttribute("TimeToTrigger", TimeValue(MilliSeconds(timeToTrigger)));
 
-    // TODO: 
-    // 1) Adjacency matrix to config file  --> OK
-    // 2) Add Adjency matrix to CellIndividualOffeset --> OK
-    // 3) Add hysteresis to CellIndividualOffeset --> TODO
-
     CellIndividualOffset::setCellNum(nMacroEnbSites);
     CellIndividualOffset::setAdjacencyMatrix(adjacency_matrix);
     delimiter = "_";
@@ -905,11 +947,11 @@ int main(int argc, char * argv[]) {
         std::cout << "\t\tcio "<< count << " = " << *i << std::endl;
         count += 1;
     }
-    
+
     CellIndividualOffset::setHysteresis(std::vector<double>(nMacroEnbSites,hysteresisCoefficient));
     CellIndividualOffset::setTimeToTrigger( std::vector<uint16_t>(nMacroEnbSites,timeToTrigger));
-    
-        
+
+
     // Set fading model
     NS_LOG_LOGIC(" ====== Setting up fading ====== ");
     if (!fadingTrace.empty()) {
@@ -943,8 +985,8 @@ int main(int argc, char * argv[]) {
     Ptr < ListPositionAllocator > enbPositionAlloc = CreateObject < ListPositionAllocator > ();
 
     for (unsigned i = 0; i < nMacroEnbSites; ++i){
-        enbPositionAlloc->Add(Vector(macroEnbLocations[i][0], 
-                                     macroEnbLocations[i][1], 
+        enbPositionAlloc->Add(Vector(macroEnbLocations[i][0],
+                                     macroEnbLocations[i][1],
                                      macroEnbLocations[i][2]));
     }
 
@@ -974,7 +1016,7 @@ int main(int argc, char * argv[]) {
     // UE deployment
     // **************************************
     std::cout << "Deploying UEs..." << std::endl;
-    
+
     // Install Mobility Model in UE
     std::vector < NodeContainer > VecNodeCointaner;
     std::vector < NetDeviceContainer > VecNetDeviceContainer;
@@ -1010,6 +1052,8 @@ int main(int argc, char * argv[]) {
                 Ptr < Node > node = tmpUes.Get(it);
                 Ptr < NetDevice > netDevice = UeDevs.Get(it);
                 Ptr < LteUeNetDevice > uebNetDevice = netDevice -> GetObject < LteUeNetDevice > ();
+                Ptr < LteUePhy > uePhy = uebNetDevice -> GetPhy();
+                uePhy -> TraceConnectWithoutContext("ReportUeMeasurements", MakeBoundCallback( & MyGymEnv::GetUEReportStats, myGymEnv));
                 Ptr < MobilityModel > mobilityModel = node -> GetObject < MobilityModel > ();
                 tempLocation = mobilityModel -> GetPosition();
                 eNBsLocation.push_back(tempLocation);
@@ -1029,6 +1073,8 @@ int main(int argc, char * argv[]) {
                 Ptr < Node > node = tmpUes.Get(it);
                 Ptr < NetDevice > netDevice = UeDevs.Get(it);
                 Ptr < LteUeNetDevice > uebNetDevice = netDevice -> GetObject < LteUeNetDevice > ();
+                Ptr < LteUePhy > uePhy = uebNetDevice -> GetPhy();
+                uePhy -> TraceConnectWithoutContext("ReportUeMeasurements", MakeBoundCallback( & MyGymEnv::GetUEReportStats, myGymEnv));
                 Ptr < MobilityModel > mobilityModel = node -> GetObject < MobilityModel > ();
                 tempLocation = mobilityModel -> GetPosition();
                 eNBsLocation.push_back(tempLocation);
@@ -1036,17 +1082,16 @@ int main(int argc, char * argv[]) {
             }
         VecNodeCointaner.push_back(tmpUes);
         VecNetDeviceContainer.push_back(UeDevs);
-
-        // NOTE: Code below allows to generate a file with UEs movement trace
-        // AsciiTraceHelper ascii;
-        // MobilityHelper::EnableAsciiAll (ascii.CreateFileStream ("mobility-trace-example_5.mob"));
     }
+    // NOTE: Code below allows to generate a file with UEs movement trace
+    // AsciiTraceHelper ascii;
+    // MobilityHelper::EnableAsciiAll (ascii.CreateFileStream ("train_scenario_1.mob"));
 
     // **************************************
     // Internet and Remote Host
     // **************************************
     std::cout << "Setting up internet and create a single remote host..." << std::endl;
-    
+
     // Create a single RemoteHost
     Ptr < Node > remoteHost;
     NodeContainer remoteHostContainer;
@@ -1062,9 +1107,9 @@ int main(int argc, char * argv[]) {
 
     // Create the Internet
     PointToPointHelper p2ph;
-    p2ph.SetDeviceAttribute("DataRate", DataRateValue(DataRate(p2phDataRate)));   
-    p2ph.SetDeviceAttribute("Mtu", UintegerValue(p2phMTU));  
-    p2ph.SetChannelAttribute("Delay", TimeValue(Seconds(p2phDelay)));  
+    p2ph.SetDeviceAttribute("DataRate", DataRateValue(DataRate(p2phDataRate)));
+    p2ph.SetDeviceAttribute("Mtu", UintegerValue(p2phMTU));
+    p2ph.SetChannelAttribute("Delay", TimeValue(Seconds(p2phDelay)));
     Ptr < Node > pgw = epcHelper -> GetPgwNode();
     NetDeviceContainer internetDevices = p2ph.Install(pgw, remoteHost);
     Ipv4AddressHelper ipv4h;
@@ -1207,6 +1252,7 @@ int main(int argc, char * argv[]) {
         enbPhy -> TraceConnectWithoutContext("DlPhyTransmission", MakeBoundCallback( & MyGymEnv::GetPhyStats, myGymEnv));
     }
 
+
     // Enable output traces
     if (outputTraceFiles) {
         std::cout << "Enabling the simulation trace..." << std::endl;
@@ -1220,6 +1266,26 @@ int main(int argc, char * argv[]) {
         MakeCallback( & NotifyHandoverStartEnb));
     Config::Connect("/NodeList/*/DeviceList/*/LteEnbRrc/HandoverEndOk",
         MakeCallback( & NotifyHandoverEndOkEnb));
+    
+    /*
+    // CODE USEFUL FOR GENERATING REM
+    Ptr<RadioEnvironmentMapHelper> remHelper = CreateObject<RadioEnvironmentMapHelper>();
+    remHelper->SetAttribute("Channel", PointerValue(lteHelper->GetDownlinkSpectrumChannel()));
+    remHelper->SetAttribute("OutputFile", StringValue("rem.out"));
+    remHelper->SetAttribute("XMin", DoubleValue(0));
+    remHelper->SetAttribute("XMax", DoubleValue(2400));
+    remHelper->SetAttribute("XRes", UintegerValue(50));
+    remHelper->SetAttribute("YMin", DoubleValue(0));
+    remHelper->SetAttribute("YMax", DoubleValue(1600));
+    remHelper->SetAttribute("YRes", UintegerValue(50));
+    remHelper->SetAttribute("Z", DoubleValue(0.0));
+    remHelper->SetAttribute("UseDataChannel", BooleanValue(true));
+    remHelper->SetAttribute("RbId", IntegerValue(-1));
+    remHelper->SetAttribute("StopWhenDone", BooleanValue(true));
+    remHelper->SetAttribute("Earfcn", UintegerValue(macroEnbDlEarfcn));
+    remHelper->SetAttribute("Bandwidth", UintegerValue(macroEnbDlEarfcn));
+    remHelper->Install();
+    */
 
 
     Simulator::Stop(Seconds(simTime));

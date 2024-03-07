@@ -14,13 +14,13 @@ class CustomEnv(gym.Env):
     """
     # TODO: It seems not used, Do we eliminate it?
     metadata = {"render_modes": ["human"], "render_fps": 30}
-    feature_per_cell = 4    # For each cell, 4 global features are traced:
-                            #  - UserCount: Number of connected users,
-                            #  - dlThroughput: for each cell, the total download Throughput (higher is better).
-                            #                  It needs to be normalized, which is the criterium?
-                            #  - rbUtil: resource block utilization, it a measure of cell saturation 0 <= x <= 1
-                            #  - MCSPen: modulation and coding scheme. For each cell, only the first 10 MSC index are
-                            #            taken into account. They are related to low SINR
+    # NOTE: For each cell, 4 global features are traced:
+    #  - UserCount: Number of connected users,
+    #  - dlThroughput: for each cell, the total download Throughput (higher is better).
+    #                  It needs to be normalized, which is the criterium?
+    #  - rbUtil: resource block utilization, it a measure of cell saturation 0 <= x <= 1
+    #  - MCSPen: modulation and coding scheme. For each cell, only the first 10 MSC index are
+    #            taken into account. They are related to low SINR
     def __init__(self,
                  port: int,
                  sim_step_time: float,
@@ -31,6 +31,9 @@ class CustomEnv(gym.Env):
                  num_of_cells: int,
                  num_of_users: int,
                  max_throu: int,
+                 max_msc_idx: int,
+                 sum_up_mcs: bool,
+                 step_CIO: int,
                  debug: bool):
         """
 
@@ -43,6 +46,7 @@ class CustomEnv(gym.Env):
         :param num_of_cells: int, number of cells, is should be sincronized with the value in the simulator
         :param num_of_users: int, number of UEs
         :param max_throu: max throughput, it is used only to normalize the throughput
+        :param step_CIO: int, step used to discretize CIO values. If step_CIO < 0, CIO values are treated as continous
         :param debug: Bool
         """
         super(CustomEnv, self).__init__()
@@ -53,6 +57,12 @@ class CustomEnv(gym.Env):
                                  simArgs=sim_args,
                                  debug=debug)
         self.env._max_episode_steps = max_env_steps
+        self.max_msc_idx = max_msc_idx
+        self.sum_up_mcs = sum_up_mcs
+        if self.sum_up_mcs:
+            self.feature_per_cell = 3 + 1
+        else:
+            self.feature_per_cell = 3 + self.max_msc_idx
 
         self.num_of_cells = num_of_cells
         self.num_of_users = num_of_users
@@ -60,8 +70,19 @@ class CustomEnv(gym.Env):
         self.state_dim = self.num_of_cells * self.feature_per_cell
         self.action_dim = self.env.action_space.shape[0]
         self.action_bound = self.env.action_space.high
-        self.action_space = spaces.Box(low=-1, high=1,
-                                       shape=(self.action_dim,), dtype=np.float32)
+
+        self.step_CIO = step_CIO
+        self.a_level = None
+        self.a_num = None
+        if step_CIO > 0:
+            # Step CIO > 0 implies action space discretized
+            ac_space = self.env.action_space  # Getting the action space
+            self.a_level = int(ac_space.high[0])  # CIO levels
+            self.a_num = int(ac_space.shape[0])
+            self.action_space = spaces.Discrete(int(self.a_level) ** int(self.a_num))
+        else:
+            self.action_space = spaces.Box(low=-1, high=1,
+                                           shape=(self.action_dim,), dtype=np.float32)
         self.observation_space = spaces.Box(low=0, high=self.num_of_users,
                                             shape=(self.state_dim,), dtype=np.float32)
         self.cumulative_rewards = self._reset_cumulative_rewards()
@@ -78,6 +99,7 @@ class CustomEnv(gym.Env):
         """
         action = self._agent_action_2_env_action(action)
         next_state, reward, done, info = self.env.step(action)
+        info = {'reward_per_agent': info}
         if next_state is None:
             print('WARNING: next state is NONE!')
             return None, None, None, None, None
@@ -145,16 +167,32 @@ class CustomEnv(gym.Env):
         state2 = state2 / self.max_throu
         state3 = np.reshape(state['UserCount'], [self.num_of_cells, 1])  # Reshape the matrix
         state3 = state3 / self.num_of_users
-        MCS_t = np.array(state['MCSPen'])
-        state4 = np.sum(MCS_t[:, :10], axis=1)  # For each cell, only the first 10 MSC index are taken into account
-                                                # They are related to low SINR
-                                                # Warning: np.sum! we summing on the MSC index, so only one aggregated
-                                                #          feature per cell from msc
-        state4 = np.reshape(state4, [self.num_of_cells, 1])
+        state4 = np.array(state['MCSPen'])[:, :self.max_msc_idx] # For each cell,
+                                                                 # only the first n=10 MSC index are taken into account
+                                                                 # They are related to low SINR
+        if self.sum_up_mcs:
+            state4 = np.reshape(np.sum(state4, axis=1), [self.num_of_cells, 1])
+
         return np.reshape(np.concatenate((state1, state2, state3, state4), axis=None), [1, self.state_dim])
 
-    def _agent_action_2_env_action(self, action_index):
-        raise NotImplementedError
+    def _agent_action_2_env_action(self, action_index) -> List:
+        """Translate the action from agent to enviroment format
+
+        :param action_index
+        :return action vector as a List
+        """
+        if self.step_CIO > 0:
+            print(action_index)
+
+            action = np.base_repr(action_index + int(self.a_level) ** int(self.a_num),
+                                  base=int(self.a_level))[-self.a_num:]
+            action = [int(a) for a in action]
+            action = np.concatenate((np.zeros(self.a_num - len(action)), action), axis=None)
+            action = [self.step_CIO * (x - np.floor(self.a_level / 2)) for x in action]  # action vector
+            return action
+        else:
+            print(action_index * self.action_bound)
+            return action_index * self.action_bound
 
     def get_episode_length(self) -> int:
         return self.env._max_episode_steps

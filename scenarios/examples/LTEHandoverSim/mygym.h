@@ -38,7 +38,7 @@ namespace ns3 {
         MyGymEnv();
         MyGymEnv(double stepTime, uint32_t N1, uint32_t N2, uint16_t N3, 
                  double collectingWindow, double blockThr, uint16_t rewardType, 
-                 uint32_t cioNumber, std::vector < double > cioRange);
+                 uint32_t cioNumber, std::vector < double > cioRange, std::vector < int > nodeDegrees);
         virtual~MyGymEnv();
         static TypeId GetTypeId(void);
         virtual void DoDispose();
@@ -52,6 +52,8 @@ namespace ns3 {
         bool ExecuteActions(Ptr < OpenGymDataContainer > action);
         static void GetPhyStats(Ptr < MyGymEnv > gymEnv,
             const PhyTransmissionStatParameters params);
+        static void GetUEReportStats(Ptr < MyGymEnv > gymEnv, 
+            const uint16_t rnti, const uint16_t cell_id, const double rsrpDbm, const double rsrqDb, const bool isServingCell, const unsigned char var_char);
         static void SetInitNumofUEs(Ptr < MyGymEnv > gymEnv, std::vector < uint32_t > num);
         static void GetNumofUEs(Ptr < MyGymEnv > gymEnv, uint16_t CellDec, uint16_t CellInc, uint16_t CellInc_Ues);
 
@@ -68,14 +70,19 @@ namespace ns3 {
         uint32_t m_nRBTotal;
         uint8_t m_chooseReward;
         uint32_t m_cioNumber;
+        std::vector < int > m_nodeDegrees;
         std::vector < double > m_cioRange;
         std::vector < uint32_t > m_cellFrequency;
         std::vector < uint32_t > m_UesNum;
         std::vector < float > m_dlThroughputVec;
         float m_dlThroughput;
         std::vector < std::vector < uint32_t >> m_MCSPen;
+        std::vector < std::vector < uint32_t >> m_MCS_nRB;
+        std::vector < std::vector < float >> m_MCS_bits;
         std::vector < uint32_t > m_rbUtil;
         std::vector < float > rewards;
+        std::vector < float > reward_per_cio;
+        std::vector < float > last_reward_per_cio;
         double m_interval = 0.1;
         std::map < uint16_t,
         std::map < uint16_t,

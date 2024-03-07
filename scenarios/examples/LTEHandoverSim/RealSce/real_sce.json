@@ -1,0 +1,104 @@
+{
+  "number_of_episodes": 200,
+  "max_steps_per_episode": 250,
+  "evaluate_agent_each_n_steps": 150,
+  "n_eval_episodes": 1,
+  "max_msc_idx": 10,
+  "sum_up_mcs": true,
+  "step_CIO": -1,
+  "max_troughput_normalization": 30,
+  "device": "cpu",
+  "agent_type": "sb_marltd3",
+  "agents": {
+    "ddqn": {
+      "batch_size": 32,
+      "learning_rate": 0.001,
+      "memory_size": 20000,
+      "gamma": 0.95,
+      "epsilon_start": 1,
+      "epsilon_min": 0.01,
+      "epsilon_decay": 0.9995,
+      "hidden_layers": 3,
+      "hidden_neurons": 24
+    },
+    "sb_td3": {
+      "policy_params": {
+        "net_arch": [24, 24, 24]
+      },
+      "common_params": {
+        "buffer_size": 10000,
+        "learning_starts":100,
+        "learning_rate": 0.001,
+        "batch_size":32,
+        "tau":0.005,
+        "gamma":0.99,
+        "train_freq":1,
+        "gradient_steps":1,
+        "policy_delay":5,
+        "action_noise_sigma": 0.1,
+        "target_policy_noise":0.1,
+        "target_noise_clip":0.5,
+        "stats_window_size":100
+      }
+    },
+    "sb_ppo": {
+      "policy_params": {
+        "net_arch": [24, 24, 24]
+      },
+      "common_params": {
+        "n_steps":150,
+        "batch_size":32,
+        "n_epochs":15,
+        "learning_rate":0.001
+      }
+    },
+    "sb_dqn": {
+      "policy_params": {
+        "net_arch": [24, 24, 24]
+      },
+      "learning_rate": 0.001,
+      "buffer_size": 20000,
+      "learning_starts": 100,
+      "batch_size": 32,
+      "tau": 1.0,
+      "gamma": 0.95,
+      "target_update_episodes": 2,
+      "exploration_fraction": 0.1,
+      "exploration_initial_eps": 1.0,
+      "exploration_final_eps": 0.01
+    },
+    "sb_marltd3": {
+      "distributed_params": {
+        "latent_space_size": 24,
+        "actor_gnn": false,
+        "actor_gnn_cls": true,
+        "critic_gnn": false,
+        "gnn_mlp_deep": 2,
+        "gnn_dropout": 0.0,
+        "actor_gnn_stack_size": 2,
+        "critic_gnn_stack_size": 2,
+        "mlp_hidden_layers": 3
+      },
+      "common_params": {
+        "reward_per_agent": false,
+        "buffer_size": 10000,
+        "learning_starts":100,
+        "learning_rate": 0.001,
+        "batch_size":32,
+        "tau":0.005,
+        "gamma":0.99,
+        "train_freq":1,
+        "gradient_steps":1,
+        "policy_delay":5,
+          "action_noise_sigma": 0.1,
+        "target_policy_noise":0.2,
+        "target_noise_clip":0.5,
+        "stats_window_size":100
+      }
+    }
+  },
+  "tensorboard_log_dir": "./{}_real_sce_tensorboard/",
+  "model_path": "{}_real_sce_{}",
+  "ns3_path": "/home/msa/NS3/repos/ns-3-allinone/ns-3-dev-git",
+  "launch_sim_file": ""
+}
